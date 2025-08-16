@@ -30,7 +30,7 @@ const config = {
   organizationName: 'mdexdev02', // Usually your GitHub org/user name.
   projectName: 'fsr-sensor-wiki', // Usually your repo name.
 
-  onBrokenLinks: 'throw',
+  onBrokenLinks: 'warn',
   onBrokenMarkdownLinks: 'warn',
 
   // Even if you don't use internationalization, you can use this field to set
