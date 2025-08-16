@@ -1,0 +1,265 @@
+---
+sidebar_position: 3
+title: 작동 원리
+description: FSR 센서의 압력-저항 관계와 측정 원리를 상세히 이해합니다
+keywords: [FSR 작동 원리, 압력 저항 관계, 전도성 폴리머, 측정 회로]
+---
+
+import Tabs from '@theme/Tabs';
+import TabItem from '@theme/TabItem';
+
+# FSR 센서 작동 원리
+
+## 압력-저항 관계
+
+FSR 센서의 핵심은 **압력과 저항의 반비례 관계**입니다.
+
+### 기본 특성 곡선
+
+```
+저항 (Ω)
+   ↑
+10MΩ │ ●
+     │  ╲
+ 1MΩ │   ╲●
+     │    ╲
+100kΩ│     ╲●
+     │      ╲
+ 10kΩ│       ╲●
+     │        ╲●
+  1kΩ│         ●━━━●
+     └──────────────────→ 압력 (N)
+     0   1   5   10  20
+```
+
+### 수학적 관계
+
+FSR의 저항값은 다음과 같은 관계식을 따릅니다:
+
+```
+R = R₀ / (F^α)
+
+여기서:
+- R: 측정된 저항값 (Ω)
+- R₀: 초기 저항값 (무부하 시)
+- F: 가해진 힘 (N)
+- α: 센서 특성 계수 (일반적으로 0.5~1.0)
+```
+
+## 전도성 폴리머의 역할
+
+### 미세 구조 변화
+
+<Tabs>
+  <TabItem value="structure" label="구조 변화" default>
+
+FSR 센서 내부의 전도성 폴리머는 압력에 따라 다음과 같이 변합니다:
+
+1. **무압력 상태**
+   - 전도성 입자들이 폴리머 매트릭스 내에 분산
+   - 입자 간 거리가 멀어 전류 흐름 차단
+   - 저항: \>10MΩ
+
+2. **압력 인가 시**
+   - 폴리머가 압축되며 입자 간 거리 감소
+   - 전도성 경로 형성 시작
+   - 저항: 급격히 감소
+
+3. **높은 압력**
+   - 다수의 전도성 경로 형성
+   - 최소 저항값에 도달
+   - 저항: ~1kΩ
+
+  </TabItem>
+  <TabItem value="material" label="재료 특성">
+
+**전도성 잉크 구성**: 카본 블랙 또는 은 입자, 폴리머 바인더, 용제 및 첨가제로 구성됩니다.
+
+**특성**: 입자 크기 20\~100nm, 함량 15\~40%, 비저항 10\~1000 Ω·cm의 특성을 가집니다.
+
+  </TabItem>
+</Tabs>
+
+## 측정 회로 설계
+
+### 1. 기본 전압 분배 회로
+
+가장 간단하고 널리 사용되는 방법입니다.
+
+```
+     +5V
+      │
+      │
+    [FSR]  ← 가변 저항
+      │
+      ├──── Vout (to ADC)
+      │
+    [R_ref] ← 고정 저항 (10kΩ)
+      │
+     GND
+```
+
+**출력 전압 계산**:
+```
+Vout = Vcc × R_ref / (R_fsr + R_ref)
+```
+
+### 2. Arduino 연결 예제
+
+```cpp
+const int FSR_PIN = A0;
+const float VCC = 5.0;
+const float R_REF = 10000.0; // 10kΩ
+
+void setup() {
+  Serial.begin(9600);
+}
+
+void loop() {
+  int adcValue = analogRead(FSR_PIN);
+  
+  // ADC 값을 전압으로 변환
+  float voltage = adcValue * (VCC / 1023.0);
+  
+  // 전압으로부터 FSR 저항 계산
+  float fsrResistance = R_REF * (VCC / voltage - 1.0);
+  
+  // 저항을 힘으로 변환 (센서별 교정 필요)
+  float force = calculateForce(fsrResistance);
+  
+  Serial.print("ADC: "); Serial.print(adcValue);
+  Serial.print(" | V: "); Serial.print(voltage);
+  Serial.print(" | R: "); Serial.print(fsrResistance);
+  Serial.print(" | Force: "); Serial.println(force);
+  
+  delay(100);
+}
+
+float calculateForce(float resistance) {
+  // 간단한 변환 예제 (실제로는 교정 필요)
+  if (resistance > 100000) return 0; // 100kΩ 이상: 무압력
+  if (resistance < 1000) return 20;   // 1kΩ 이하: 최대 압력
+  
+  // 로그 스케일 변환
+  return 20.0 * (1.0 - log10(resistance/1000.0) / 2.0);
+}
+```
+
+### 3. 고급 측정 회로
+
+<Tabs>
+  <TabItem value="opamp" label="OP-AMP 회로" default>
+
+**장점**: 선형 출력, 높은 정확도
+
+```
+     +5V
+      │
+    [FSR]
+      │
+      ├───┬─── Vout
+      │   │
+      │  ╱│╲
+      │ ╱ │ ╲ OP-AMP
+      │╱  │  ╲
+      ●───┴───●
+      │       │
+    [Rf]      │
+      │       │
+     GND     GND
+```
+
+  </TabItem>
+  <TabItem value="wheatstone" label="휘트스톤 브리지">
+
+**장점**: 온도 보상, 높은 감도
+
+```
+        +Vcc
+         │
+    ┌────┼────┐
+    │    │    │
+  [R1]  [FSR] [R3]
+    │    │    │
+    ├────●────┤ Vout (차동 신호)
+    │         │
+  [R2]      [R4]
+    │         │
+    └────┬────┘
+        GND
+```
+
+  </TabItem>
+</Tabs>
+
+## 신호 처리 기법
+
+### 노이즈 필터링
+
+```cpp
+// 이동 평균 필터
+const int SAMPLES = 10;
+int readings[SAMPLES];
+int readIndex = 0;
+int total = 0;
+int average = 0;
+
+int getFilteredReading() {
+  total = total - readings[readIndex];
+  readings[readIndex] = analogRead(FSR_PIN);
+  total = total + readings[readIndex];
+  readIndex = (readIndex + 1) % SAMPLES;
+  average = total / SAMPLES;
+  return average;
+}
+```
+
+### 임계값 검출
+
+```cpp
+const int THRESHOLD = 500;
+const int HYSTERESIS = 50;
+bool isPressed = false;
+
+void checkPressure() {
+  int reading = analogRead(FSR_PIN);
+  
+  if (!isPressed && reading > THRESHOLD + HYSTERESIS) {
+    isPressed = true;
+    onPressDetected();
+  } else if (isPressed && reading < THRESHOLD - HYSTERESIS) {
+    isPressed = false;
+    onReleaseDetected();
+  }
+}
+```
+
+## 실제 측정 시 고려사항
+
+### 1. 응답 시간
+- 일반적으로 1~2ms
+- 빠른 변화 감지에는 부적합
+- 정적/준정적 측정에 최적
+
+### 2. 드리프트 현상
+- 장시간 압력 유지 시 저항값 변화
+- 주기적 재교정 필요
+- 동적 측정으로 최소화
+
+### 3. 온도 영향
+- 온도 상승 시 저항 감소
+- 온도 계수: 약 -0.5%/°C
+- 온도 센서와 함께 사용하여 보상
+
+:::tip 실습 팁
+1. 항상 풀다운 저항(10kΩ)을 사용하세요
+2. ADC 입력 전 0.1μF 캐패시터로 노이즈 필터링
+3. 센서별로 교정 곡선을 작성하여 정확도 향상
+:::
+
+## 다음 단계
+
+작동 원리를 이해하셨다면 다음 내용을 학습해보세요:
+- [전기적 특성](../electrical-characteristics) - 상세 전기 사양
+- [측정 회로 설계 가이드](/docs/technical-docs/measurement) - 고급 회로 설계
+- [첫 번째 프로젝트](/docs/tutorials/beginner/first-project) - 실습 시작하기
