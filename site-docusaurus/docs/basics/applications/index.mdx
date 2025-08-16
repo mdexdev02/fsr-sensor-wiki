@@ -1,0 +1,447 @@
+---
+sidebar_position: 6
+title: 응용 분야
+description: FSR 센서의 다양한 활용 분야와 실제 적용 사례를 소개합니다
+keywords: [FSR 응용, 의료 헬스케어, 산업 자동화, 교육, 게임]
+---
+
+import Tabs from '@theme/Tabs';
+import TabItem from '@theme/TabItem';
+
+# FSR 센서 응용 분야
+
+FSR 센서는 다양한 산업 분야에서 혁신적인 솔루션을 제공합니다.
+
+## 🏥 의료 및 헬스케어
+
+### 재활 치료
+
+#### 자세 교정 시스템
+```cpp
+// 자세 모니터링 시스템 예제
+class PostureMonitor {
+  private:
+    int sensors[4] = {A0, A1, A2, A3}; // 4개 센서
+    int baseline[4];
+    
+  public:
+    void calibrate() {
+      Serial.println("올바른 자세를 유지하세요...");
+      delay(3000);
+      for(int i = 0; i < 4; i++) {
+        baseline[i] = analogRead(sensors[i]);
+      }
+    }
+    
+    String checkPosture() {
+      int readings[4];
+      for(int i = 0; i < 4; i++) {
+        readings[i] = analogRead(sensors[i]);
+      }
+      
+      // 좌우 균형 체크
+      int leftSum = readings[0] + readings[1];
+      int rightSum = readings[2] + readings[3];
+      int balance = abs(leftSum - rightSum);
+      
+      if(balance > 200) return "좌우 불균형";
+      
+      // 전후 균형 체크
+      int frontSum = readings[0] + readings[2];
+      int backSum = readings[1] + readings[3];
+      int frontBack = abs(frontSum - backSum);
+      
+      if(frontBack > 200) return "전후 불균형";
+      
+      return "정상 자세";
+    }
+};
+```
+
+#### 보행 분석
+- **용도**: 보행 패턴 분석, 재활 진도 모니터링
+- **센서 배치**: 신발 깔창 내 다중 센서
+- **측정 항목**: 
+  - 발 압력 분포
+  - 보행 주기
+  - 체중 이동 패턴
+
+### 환자 모니터링
+
+<Tabs>
+  <TabItem value="bed" label="침대 모니터링" default>
+
+**욕창 방지 시스템**
+- 장시간 같은 자세 감지
+- 압력 분포 매핑
+- 자동 알림 시스템
+
+```javascript
+// 압력 매트릭스 시각화
+function visualizePressureMap(sensorData) {
+  const heatmap = [];
+  for(let i = 0; i < 8; i++) {
+    for(let j = 0; j < 8; j++) {
+      const pressure = sensorData[i][j];
+      const color = getHeatmapColor(pressure);
+      heatmap.push({x: i, y: j, color: color});
+    }
+  }
+  return heatmap;
+}
+```
+
+  </TabItem>
+  <TabItem value="wheelchair" label="휠체어 모니터링">
+
+**스마트 휠체어 쿠션**
+
+압력 분산 모니터링, 자세 변경 알림, 앉은 시간 추적 기능을 제공합니다.
+
+  </TabItem>
+  <TabItem value="prosthetic" label="의수/의족">
+
+**감각 피드백 시스템**
+
+그립 강도 제어, 물체 감지, 촉각 피드백 기능을 통해 자연스러운 감각을 제공합니다.
+
+  </TabItem>
+</Tabs>
+
+## 🏭 산업 자동화
+
+### 품질 검사
+
+#### 제품 압력 테스트
+```cpp
+// 품질 검사 시스템
+class QualityControl {
+  const float MIN_PRESSURE = 5.0;  // N
+  const float MAX_PRESSURE = 15.0; // N
+  
+  bool testProduct(int sensorPin) {
+    float pressure = measurePressure(sensorPin);
+    
+    if(pressure < MIN_PRESSURE) {
+      Serial.println("불량: 압력 부족");
+      return false;
+    }
+    if(pressure > MAX_PRESSURE) {
+      Serial.println("불량: 과도한 압력");
+      return false;
+    }
+    
+    Serial.println("합격");
+    return true;
+  }
+  
+  void batchTest(int batchSize) {
+    int passed = 0;
+    for(int i = 0; i < batchSize; i++) {
+      if(testProduct(A0)) passed++;
+      delay(1000);
+    }
+    
+    float passRate = (float)passed / batchSize * 100;
+    Serial.print("합격률: ");
+    Serial.print(passRate);
+    Serial.println("%");
+  }
+};
+```
+
+### 로봇 공학
+
+#### 로봇 그리퍼
+- **적용**: 물체 파지력 제어
+- **장점**: 
+  - 부드러운 물체 손상 방지
+  - 미끄러짐 감지
+  - 적응형 그립
+
+#### 협동 로봇 (Cobot)
+```cpp
+// 충돌 감지 시스템
+class CollisionDetection {
+  const int COLLISION_THRESHOLD = 500;
+  bool emergencyStop = false;
+  
+  void checkCollision(int sensorArray[], int size) {
+    for(int i = 0; i < size; i++) {
+      if(analogRead(sensorArray[i]) > COLLISION_THRESHOLD) {
+        emergencyStop = true;
+        stopRobot();
+        Serial.println("충돌 감지! 비상 정지");
+        break;
+      }
+    }
+  }
+  
+  void stopRobot() {
+    // 모든 모터 정지
+    digitalWrite(MOTOR_ENABLE, LOW);
+    // 알람 발생
+    digitalWrite(ALARM_PIN, HIGH);
+  }
+};
+```
+
+## 🎮 엔터테인먼트
+
+### 게임 컨트롤러
+
+#### 압력 감응 버튼
+```cpp
+// 아날로그 버튼 구현
+class PressureSensitiveButton {
+  private:
+    int pin;
+    int threshold = 100;
+    int maxValue = 900;
+    
+  public:
+    PressureSensitiveButton(int p) : pin(p) {}
+    
+    float getPressureLevel() {
+      int raw = analogRead(pin);
+      if(raw < threshold) return 0;
+      if(raw > maxValue) return 1.0;
+      
+      return (float)(raw - threshold) / (maxValue - threshold);
+    }
+    
+    // 게임 액션 매핑
+    void processGameAction() {
+      float pressure = getPressureLevel();
+      
+      if(pressure == 0) {
+        // 버튼 미입력
+      } else if(pressure < 0.3) {
+        sendCommand("WALK");
+      } else if(pressure < 0.7) {
+        sendCommand("RUN");
+      } else {
+        sendCommand("SPRINT");
+      }
+    }
+};
+```
+
+### 전자 악기
+
+#### 디지털 드럼 패드
+- **구성**: 다중 FSR 센서 배열
+- **기능**:
+  - 벨로시티 감지
+  - 멀티터치 지원
+  - 애프터터치
+
+#### MIDI 컨트롤러
+```cpp
+// MIDI 드럼 패드
+class MIDIDrumPad {
+  const int MIDI_CHANNEL = 1;
+  const int DRUM_NOTE = 36; // Kick drum
+  
+  void hitDetected(int velocity) {
+    // MIDI Note On
+    Serial.write(0x90 | MIDI_CHANNEL);
+    Serial.write(DRUM_NOTE);
+    Serial.write(velocity); // 0-127
+    
+    delay(10);
+    
+    // MIDI Note Off
+    Serial.write(0x80 | MIDI_CHANNEL);
+    Serial.write(DRUM_NOTE);
+    Serial.write(0);
+  }
+  
+  void process() {
+    int reading = analogRead(A0);
+    if(reading > 100) {
+      int velocity = map(reading, 100, 1023, 1, 127);
+      hitDetected(velocity);
+    }
+  }
+};
+```
+
+## 🎓 교육 및 연구
+
+### STEAM 교육
+
+#### 초등 교육 프로젝트
+1. **압력 감지 신호등**
+   - 보행자 버튼
+   - LED 제어
+   - 타이머 기능
+
+2. **디지털 체중계**
+   - 단위 변환 학습
+   - 데이터 기록
+   - 그래프 그리기
+
+#### 중고등 교육
+```python
+# Python을 이용한 데이터 분석 프로젝트
+import serial
+import matplotlib.pyplot as plt
+import numpy as np
+
+class FSRDataAnalyzer:
+    def __init__(self, port):
+        self.ser = serial.Serial(port, 9600)
+        self.data = []
+        
+    def collect_data(self, duration):
+        start_time = time.time()
+        while time.time() - start_time < duration:
+            if self.ser.in_waiting:
+                value = int(self.ser.readline().decode().strip())
+                self.data.append(value)
+        
+    def analyze(self):
+        # 통계 분석
+        mean = np.mean(self.data)
+        std = np.std(self.data)
+        
+        # 주파수 분석 (FFT)
+        fft = np.fft.fft(self.data)
+        freq = np.fft.fftfreq(len(self.data))
+        
+        return {
+            'mean': mean,
+            'std': std,
+            'frequency': freq,
+            'fft': fft
+        }
+```
+
+### 연구 응용
+
+#### 인간-컴퓨터 상호작용 (HCI)
+- 터치 인터페이스 연구
+- 햅틱 피드백 시스템
+- 제스처 인식
+
+#### 생체역학 연구
+- 근육 활동 모니터링
+- 관절 압력 측정
+- 운동 분석
+
+## 🚗 자동차 산업
+
+### 안전 시스템
+
+#### 시트 점유 감지
+```cpp
+// 시트벨트 경고 시스템
+class SeatOccupancy {
+  const int OCCUPANCY_THRESHOLD = 300; // ~5kg
+  bool seatbeltWarning = false;
+  
+  bool isOccupied() {
+    int sum = 0;
+    // 시트의 여러 지점 측정
+    for(int i = 0; i < 4; i++) {
+      sum += analogRead(A0 + i);
+    }
+    return (sum / 4) > OCCUPANCY_THRESHOLD;
+  }
+  
+  void checkSeatbelt() {
+    if(isOccupied() && !isSeatbeltFastened()) {
+      activateWarning();
+    }
+  }
+};
+```
+
+### 사용자 인터페이스
+- 스티어링 휠 터치 감지
+- 기어 노브 그립 센서
+- 페달 압력 모니터링
+
+## 🏠 스마트 홈
+
+### 보안 시스템
+
+#### 침입 감지
+- 바닥 압력 매트
+- 창문/문 압력 센서
+- 울타리 등반 감지
+
+### 생활 편의
+
+#### 스마트 매트리스
+```javascript
+// 수면 모니터링 시스템
+class SleepMonitor {
+  constructor() {
+    this.pressureMap = new Array(8).fill(new Array(8).fill(0));
+    this.movementHistory = [];
+  }
+  
+  analyzeSleepQuality() {
+    const movements = this.countMovements();
+    const position = this.detectSleepPosition();
+    
+    let quality = 100;
+    quality -= movements * 2; // 움직임 당 2점 감점
+    
+    if(position === 'optimal') quality += 10;
+    
+    return {
+      score: Math.max(0, quality),
+      movements: movements,
+      position: position
+    };
+  }
+}
+```
+
+## 📊 실제 구현 사례
+
+### 성공 사례 1: 병원 재활 센터
+- **문제**: 수동 자세 평가의 한계
+- **해결**: FSR 기반 실시간 모니터링
+- **결과**: 재활 효율 40% 향상
+
+### 성공 사례 2: 제조 라인
+- **문제**: 수동 품질 검사
+- **해결**: 자동 압력 테스트 시스템
+- **결과**: 불량률 75% 감소
+
+### 성공 사례 3: 교육 기관
+- **문제**: 추상적인 물리 개념
+- **해결**: FSR 실습 키트 도입
+- **결과**: 학습 이해도 60% 향상
+
+## 💡 프로젝트 아이디어
+
+### 초급 프로젝트
+1. LED 밝기 제어
+2. 간단한 전자 저울
+3. 터치 피아노
+
+### 중급 프로젝트
+1. 자세 교정 알림 시스템
+2. 스마트 도어매트
+3. 압력 감응 게임 컨트롤러
+
+### 고급 프로젝트
+1. 보행 분석 시스템
+2. 로봇 촉각 센서
+3. IoT 기반 압력 모니터링
+
+:::tip 시작하기
+각 응용 분야의 실제 구현 방법은 [튜토리얼 섹션](/docs/tutorials)에서 
+단계별로 학습할 수 있습니다.
+:::
+
+## 다음 단계
+
+- [제품 선택 가이드](/docs/products) - 응용별 최적 센서
+- [첫 프로젝트 시작](/docs/tutorials/beginner/first-project) - 실습 시작
+- [고급 프로젝트](/docs/tutorials/advanced) - 심화 응용

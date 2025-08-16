@@ -1,0 +1,288 @@
+---
+sidebar_position: 4
+title: 전기적 특성
+description: FSR 센서의 전기적 사양과 특성을 상세히 알아봅니다
+keywords: [FSR 전기적 특성, 저항 범위, 응답 시간, 온도 특성]
+---
+
+# 전기적 특성
+
+FSR 센서의 전기적 특성을 이해하는 것은 올바른 회로 설계와 정확한 측정을 위해 필수적입니다.
+
+## 주요 전기적 사양
+
+### 기본 사양표
+
+| 파라미터 | 최소값 | 표준값 | 최대값 | 단위 | 비고 |
+|---------|--------|--------|--------|------|------|
+| **저항 범위** | 1k | - | 10M | Ω | 압력 의존 |
+| **권장 전압** | 1 | 5 | 10 | V | DC |
+| **최대 전류** | - | 1 | 5 | mA | 연속 |
+| **전력 소비** | - | 5 | 50 | mW | @5V |
+| **응답 시간** | - | 1-2 | 5 | ms | 10-90% |
+| **작동 온도** | -30 | 25 | 70 | °C | - |
+
+## 저항 특성
+
+### 압력-저항 곡선
+
+FSR 센서의 저항은 압력에 따라 비선형적으로 변화합니다:
+
+```
+저항 (Ω) - 로그 스케일
+10M ┤●
+    │ ╲
+ 1M ┤  ●
+    │   ╲
+100k┤    ●
+    │     ╲
+10k ┤      ●
+    │       ╲●
+ 1k ┤         ●━━━●
+    └────────────────→
+    0  0.1  1  10  100  압력 (N)
+```
+
+### 저항 변화 특성
+
+#### 1. 초기 저항 (무부하)
+- **범위**: \>10MΩ
+- **특징**: 거의 절연 상태
+- **용도**: 터치 감지 기준점
+
+#### 2. 동작 범위
+- **경압력** (0.1-1N): 1MΩ ~ 100kΩ
+- **중압력** (1-10N): 100kΩ ~ 10kΩ  
+- **고압력** (\>10N): \<10kΩ
+
+#### 3. 포화 영역
+- **특징**: 압력 증가에도 저항 변화 미미
+- **범위**: \<2kΩ
+- **주의**: 이 영역에서는 압력 분해능 저하
+
+## 전압/전류 특성
+
+### 권장 동작 조건
+
+```cpp
+// 안전한 동작 범위
+const float MAX_VOLTAGE = 10.0;  // V
+const float MAX_CURRENT = 1.0;   // mA
+const float RECOMMENDED_VOLTAGE = 5.0; // V
+
+// 전류 제한 저항 계산
+float calculateLimitResistor(float vcc) {
+  float minFsrResistance = 1000; // 1kΩ (최소 FSR 저항)
+  float limitResistor = (vcc / MAX_CURRENT) - minFsrResistance;
+  return max(limitResistor, 10000); // 최소 10kΩ
+}
+```
+
+### I-V 특성
+
+FSR은 대체로 오믹(Ohmic) 특성을 보입니다:
+
+| 인가 전압 | 측정 전류 (@10kΩ FSR) | 선형성 |
+|----------|----------------------|--------|
+| 1V | 0.1mA | 우수 |
+| 5V | 0.5mA | 우수 |
+| 10V | 1.0mA | 양호 |
+| \>10V | \>1mA | 비선형 증가 |
+
+## 응답 시간
+
+### 동적 특성
+
+```
+압력 인가
+    ↓
+    ├─ Rise Time: 1-2ms (10% → 90%)
+    ├─ Settling Time: 3-5ms (±5% 안정화)
+    └─ Fall Time: 1-2ms (90% → 10%)
+```
+
+### 주파수 응답
+
+| 주파수 범위 | 응답 특성 | 적용 분야 |
+|------------|----------|-----------|
+| DC-10Hz | 우수 | 정적 측정 |
+| 10-100Hz | 양호 | 일반 동적 측정 |
+| 100-500Hz | 제한적 | 빠른 변화 감지 |
+| \>500Hz | 부적합 | - |
+
+### 측정 코드 예제
+
+```cpp
+// 응답 시간 측정
+unsigned long startTime, riseTime, fallTime;
+int baseline, peak;
+const int THRESHOLD_LOW = 100;  // 10%
+const int THRESHOLD_HIGH = 900; // 90%
+
+void measureResponseTime() {
+  baseline = analogRead(FSR_PIN);
+  
+  // 압력 인가 감지
+  while(analogRead(FSR_PIN) < baseline + THRESHOLD_LOW) {
+    // 대기
+  }
+  startTime = micros();
+  
+  // 90% 도달 시간 측정
+  while(analogRead(FSR_PIN) < baseline + THRESHOLD_HIGH) {
+    // 상승 중
+  }
+  riseTime = micros() - startTime;
+  
+  peak = analogRead(FSR_PIN);
+  
+  // 압력 해제 감지
+  while(analogRead(FSR_PIN) > peak - THRESHOLD_LOW) {
+    // 대기
+  }
+  startTime = micros();
+  
+  // 10% 도달 시간 측정
+  while(analogRead(FSR_PIN) > peak - THRESHOLD_HIGH) {
+    // 하강 중
+  }
+  fallTime = micros() - startTime;
+  
+  Serial.print("Rise Time: ");
+  Serial.print(riseTime);
+  Serial.print("μs, Fall Time: ");
+  Serial.print(fallTime);
+  Serial.println("μs");
+}
+```
+
+## 온도 특성
+
+### 온도 계수
+
+FSR의 저항은 온도에 따라 변화합니다:
+
+| 온도 범위 | 저항 변화율 | 보상 필요성 |
+|----------|------------|------------|
+| -30°C ~ 0°C | +1.5%/°C | 필수 |
+| 0°C ~ 25°C | -0.3%/°C | 권장 |
+| 25°C ~ 50°C | -0.5%/°C | 권장 |
+| 50°C ~ 70°C | -0.8%/°C | 필수 |
+
+### 온도 보상 방법
+
+```cpp
+// 온도 보상 알고리즘
+float temperatureCompensation(float resistance, float temperature) {
+  const float REF_TEMP = 25.0; // 기준 온도 (°C)
+  const float TEMP_COEFF = -0.005; // 온도 계수 (-0.5%/°C)
+  
+  float tempDiff = temperature - REF_TEMP;
+  float compensation = 1.0 + (TEMP_COEFF * tempDiff);
+  
+  return resistance / compensation;
+}
+
+// 사용 예제
+void loop() {
+  float rawResistance = measureFSR();
+  float temperature = readTemperature(); // 온도 센서 읽기
+  
+  float compensatedResistance = temperatureCompensation(
+    rawResistance, 
+    temperature
+  );
+  
+  Serial.print("Raw: ");
+  Serial.print(rawResistance);
+  Serial.print(" Ω, Compensated: ");
+  Serial.print(compensatedResistance);
+  Serial.println(" Ω");
+}
+```
+
+## 노이즈 특성
+
+### 노이즈 소스
+
+- **열 노이즈**: 저항 자체의 열 잡음
+- **플리커 노이즈 (1/f)**: 저주파 플리커 노이즈  
+- **EMI**: 외부 전자기 간섭
+
+### 노이즈 감소 기법
+
+```cpp
+// 하드웨어 필터 (RC 필터)
+// R = 10kΩ, C = 0.1μF → fc = 159Hz
+
+// 소프트웨어 필터
+class NoiseFilter {
+  private:
+    float alpha = 0.1; // 필터 계수
+    float filtered = 0;
+    
+  public:
+    // 지수 이동 평균 필터
+    float update(float raw) {
+      filtered = alpha * raw + (1 - alpha) * filtered;
+      return filtered;
+    }
+    
+    // 미디언 필터
+    float median(int samples[], int size) {
+      // 버블 정렬
+      for(int i = 0; i < size-1; i++) {
+        for(int j = 0; j < size-i-1; j++) {
+          if(samples[j] > samples[j+1]) {
+            int temp = samples[j];
+            samples[j] = samples[j+1];
+            samples[j+1] = temp;
+          }
+        }
+      }
+      return samples[size/2];
+    }
+};
+```
+
+## 장기 안정성
+
+### 드리프트 특성
+
+| 시간 | 드리프트 | 대책 |
+|------|---------|------|
+| 1분 | \<1% | - |
+| 1시간 | \<3% | 주기적 영점 조정 |
+| 24시간 | \<5% | 자동 교정 |
+| 1개월 | \<10% | 재교정 필요 |
+
+### 수명 특성
+
+- **기계적 수명**: \>100만 회
+- **전기적 수명**: \>500만 회 (저전력)
+- **보관 수명**: \>5년 (적절한 환경)
+
+## 회로 설계 권장사항
+
+### 권장 사항 ✅
+- 풀다운/풀업 저항 사용 (10kΩ 권장)
+- ADC 입력에 캐패시터 추가 (0.1μF)
+- 전원 디커플링 캐패시터 사용
+- 과전압 보호 회로 추가
+
+### 주의 사항 ❌
+- 10V 이상 전압 인가 금지
+- 1mA 이상 연속 전류 금지
+- 역전압 인가 금지
+- 고온 환경 장시간 노출 금지
+
+:::warning 주의사항
+FSR 센서는 정밀 측정용이 아닌 상대적 압력 변화 감지에 적합합니다.
+절대 압력 측정이 필요한 경우 로드셀이나 압전 센서를 고려하세요.
+:::
+
+## 다음 단계
+
+- [기계적 특성](../mechanical-characteristics) - 물리적 사양 확인
+- [측정 회로 설계](/docs/technical-docs/circuits) - 실제 회로 구현
+- [센서 교정 가이드](/docs/technical-docs/calibration) - 정확도 향상
