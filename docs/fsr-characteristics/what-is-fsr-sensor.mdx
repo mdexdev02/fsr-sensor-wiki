@@ -1,0 +1,106 @@
+---
+sidebar_position: 2
+title: FSR 센서란?
+---
+
+# FSR 센서란?
+
+FSR(Force Sensitive Resistor, 압력 감지 저항) 센서는 물리적인 압력, 힘, 무게를 감지하는 센서입니다.
+
+## 기본 원리
+
+FSR 센서는 가해지는 힘에 따라 저항값이 변하는 가변 저항 소자입니다.
+
+### 동작 메커니즘
+- **압력 없음**: 저항값이 매우 큼 (수 MΩ 이상)
+- **압력 증가**: 저항값이 감소 (수백 Ω까지)
+- **최대 압력**: 최소 저항값
+
+## 센서 구조
+
+![FSR 센서 구조](/img/fsr-structure-diagram.png)
+
+FSR 센서는 다음과 같은 층으로 구성됩니다:
+
+1. **상부 기판**: 유연한 필름 또는 PCB
+2. **전도성 패턴**: 인터디지털(interdigital) 전극 구조
+3. **압력 감지층**: 전도성 폴리머 재료
+4. **하부 기판**: 지지 구조
+
+## 주요 특징
+
+| 특징 | 설명 |
+|------|------|
+| **응답 시간** | < 10 μsec |
+| **측정 범위** | 5gf ~ 4kgf |
+| **두께** | 0.7mm ~ 1.5mm |
+| **수명** | 200만 회 이상 |
+| **온도 범위** | -20℃ ~ +60℃ |
+
+## 장점
+
+- ✅ **초박형 설계** - 1mm 이하의 두께로 제작 가능
+- ✅ **저전력 소비** - 동작 시 5mA 이하
+- ✅ **빠른 응답** - 마이크로초 단위 반응
+- ✅ **저렴한 가격** - 대량 생산 가능
+- ✅ **유연성** - 곡면 부착 가능 (FPC 타입)
+
+## 단점 및 한계
+
+- ❌ **정밀도 한계** - ±10~20% 오차
+- ❌ **드리프트 현상** - 장시간 압력 시 값 변화
+- ❌ **온습도 영향** - 환경 변화에 민감
+- ❌ **히스테리시스** - 가압/감압 시 다른 값
+
+## 응용 분야
+
+### 의료/헬스케어
+- 보행 분석 시스템
+- 재활 훈련 장비
+- 수면 모니터링
+
+### 산업 자동화
+- 로봇 그리퍼
+- 압력 스위치
+- 충돌 감지
+
+### 소비자 제품
+- 전자 악기
+- 게임 컨트롤러
+- 스마트 의자/방석
+
+## Force-Resistance 특성 곡선
+
+```jsx
+import {LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, Legend} from 'recharts';
+
+const data = [
+  {force: 0, resistance: 10000},
+  {force: 10, resistance: 5000},
+  {force: 50, resistance: 2000},
+  {force: 100, resistance: 1000},
+  {force: 500, resistance: 500},
+  {force: 1000, resistance: 300},
+  {force: 2000, resistance: 200},
+];
+
+<LineChart width={600} height={300} data={data}>
+  <CartesianGrid strokeDasharray="3 3" />
+  <XAxis dataKey="force" label={{ value: 'Force (g)', position: 'insideBottom', offset: -5 }} />
+  <YAxis label={{ value: 'Resistance (Ω)', angle: -90, position: 'insideLeft' }} />
+  <Tooltip />
+  <Legend />
+  <Line type="monotone" dataKey="resistance" stroke="#8884d8" name="저항값" />
+</LineChart>
+```
+
+:::tip 선택 가이드
+- **정밀 측정**: QA6P (가장 작은 센싱 영역)
+- **유연한 설치**: RA9, RA18 (FPC 타입)
+- **버튼 대체**: RA9P, RA12P
+- **넓은 면적**: QA3040P
+:::
+
+## 다음 단계
+
+센서의 전기적 특성과 회로 구성에 대해 알아보려면 다음 페이지를 참조하세요.

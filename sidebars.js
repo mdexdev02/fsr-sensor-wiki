@@ -40,6 +40,15 @@ const sidebars = {
     },
     {
       type: 'category',
+      label: '🔬 FSR센서의 특성과 활용',
+      collapsed: false,
+      items: [
+        'fsr-characteristics/intro',
+        'fsr-characteristics/what-is-fsr-sensor',
+      ],
+    },
+    {
+      type: 'category',
       label: '📦 제품 카탈로그',
       collapsed: true,
       items: [

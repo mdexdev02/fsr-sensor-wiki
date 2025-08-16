@@ -41,7 +41,7 @@ npm run build
 - **Framework**: [Docusaurus 3.8.1](https://docusaurus.io/)
 - **Hosting**: [Vercel](https://vercel.com/)
 - **Language**: MDX (Markdown + React)
-- **Version**: V.0.2.0.0
+- **Version**: V.0.2.1.0
 
 ## 📝 문서 기여
 
