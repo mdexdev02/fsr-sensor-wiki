@@ -54,6 +54,7 @@ npm run build
 ```
 site-docusaurus/
 ├── docs/           # 문서 파일
+├── resources/   # 기존 위키에서 사용했던 기술 자료, 회사 소개 자료.
 ├── src/            # React 컴포넌트 및 스타일
 ├── static/         # 정적 파일 (이미지 등)
 ├── blog/           # 블로그 포스트
@@ -67,4 +68,4 @@ site-docusaurus/
 
 ## 📄 라이선스
 
-Copyright © 2025 FSR Sensor Wiki. Built with Docusaurus.
+Copyright © 2025 FSR Sensor Wiki. Built with Docusaurus and Vercel.
