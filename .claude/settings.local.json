@@ -1,0 +1,49 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(node:*)",
+      "Bash(npm --version)",
+      "Bash(git --version)",
+      "Bash(npm run start:*)",
+      "Bash(git add:*)",
+      "Bash(git commit:*)",
+      "Bash(git push:*)",
+      "Bash(mkdir:*)",
+      "WebFetch(domain:docs.anthropic.com)",
+      "WebFetch(domain:mdex-shop.com)",
+      "WebFetch(domain:sites.google.com)",
+      "Bash(rm:*)",
+      "Bash(mv:*)",
+      "Bash(git init:*)",
+      "Bash(git config:*)",
+      "Bash(git rm:*)",
+      "Bash(git remote add:*)",
+      "Bash(git branch:*)",
+      "Bash(git pull:*)",
+      "Bash(git checkout:*)",
+      "Bash(git rebase:*)",
+      "Bash(git rev-list:*)",
+      "Bash(curl:*)",
+      "WebFetch(domain:vercel.com)",
+      "Bash(npm run build:*)",
+      "Bash(npx vercel:*)",
+      "Bash(taskkill:*)",
+      "Bash(cp:*)",
+      "Bash(git remote set-url:*)",
+      "Bash(git ls-tree:*)",
+      "Bash(zip:*)",
+      "Bash(git fetch:*)",
+      "Bash(npm install)",
+      "Bash(powershell:*)",
+      "Bash(npm install:*)",
+      "WebSearch",
+      "Bash(git mv:*)"
+    ],
+    "deny": [],
+    "ask": [],
+    "defaultMode": "acceptEdits",
+    "additionalDirectories": [
+      "D:\\coding\\SalesBase\\ProductTutorialWiki"
+    ]
+  }
+}

@@ -1,0 +1,41 @@
+{
+  "sessionId": "claude-session-20250817",
+  "memory": {
+    "enabled": true,
+    "contextWindow": 200000,
+    "persistSession": true,
+    "rememberFiles": true,
+    "maxFileSize": 1048576
+  },
+  "tools": {
+    "enabled": true,
+    "allowedCommands": ["git", "npm", "node", "npx", "vercel"],
+    "bash": {
+      "timeout": 120000
+    }
+  },
+  "editor": {
+    "tabSize": 2,
+    "useTabs": false,
+    "formatOnSave": true
+  },
+  "language": {
+    "preferred": "ko",
+    "commitMessages": "ko"
+  },
+  "codeGeneration": {
+    "style": "modern",
+    "typescript": true,
+    "comments": false
+  },
+  "project": {
+    "type": "wiki",
+    "framework": "docusaurus",
+    "deployment": "vercel"
+  },
+  "rules": {
+    "alwaysBuildBeforeCommit": true,
+    "useExistingPatterns": true,
+    "followProjectConventions": true
+  }
+}
